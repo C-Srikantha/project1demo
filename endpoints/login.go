@@ -15,27 +15,54 @@ type Logininfo struct {
 	Password string
 }
 
+//checks user is present and allows user to login is password matches in db
 func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
-	var flag bool = true
 	detail, err := io.ReadAll(r.Body)
-	error(err)
+	if err != nil {
+		badrequesterror(err, w)
+		return
+	}
 	var det Logininfo
 	var det1 Registration
 	err = json.Unmarshal(detail, &det)
-	error(err)
-	err = db.Model(&det1).Where("username=?", det.Username).Select()
 	if err != nil {
-		fmt.Fprint(w, "No user found")
+		error(err)
 		return
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(det1.Password), []byte(det.Password))
+	res := map[string]string{"message": ""}
+	err = db.Model(&det1).Where("username=?", det.Username).Select()
 	if err != nil {
-		flag = false
+		w.WriteHeader(http.StatusNotFound)
+		res["message"] = "No User Found"
+		str, err := json.Marshal(res)
+		if err != nil {
+			error(err)
+			return
+		}
+		w.Write(str)
+		return
 	}
-	if flag == true {
-		fmt.Fprintf(w, "%s Welcome", det.Username)
+	err = bcrypt.CompareHashAndPassword([]byte(det1.Password), []byte(det.Password)) //decrypt password
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
+		res["message"] = "Entered password is wrong!!!"
+		str, err := json.Marshal(res)
+		if err != nil {
+			error(err)
+			return
+		}
+		w.Write(str)
+		return
 	} else {
-		fmt.Fprint(w, "Entered password is wrong")
+		str := fmt.Sprintf("%s Welcome", det.Username)
+		res["message"] = str
+		jsonstr, err := json.Marshal(res)
+		if err != nil {
+			error(err)
+			return
+		}
+		w.Write(jsonstr)
+		return
 	}
 
 }
