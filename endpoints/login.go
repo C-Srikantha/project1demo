@@ -19,14 +19,14 @@ type Logininfo struct {
 func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	detail, err := io.ReadAll(r.Body)
 	if err != nil {
-		badrequesterror(err, w)
+		//badrequesterror(err, w)
 		return
 	}
 	var det Logininfo
 	var det1 Registration
-	err = json.Unmarshal(detail, &det)
+	err = json.Unmarshal(detail, &det) //convert json to struct
 	if err != nil {
-		error(err)
+		//error(err)
 		return
 	}
 	res := map[string]string{"message": ""}
@@ -36,7 +36,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		res["message"] = "No User Found"
 		str, err := json.Marshal(res)
 		if err != nil {
-			error(err)
+			//error(err)
 			return
 		}
 		w.Write(str)
@@ -48,7 +48,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		res["message"] = "Entered password is wrong!!!"
 		str, err := json.Marshal(res)
 		if err != nil {
-			error(err)
+			//error(err)
 			return
 		}
 		w.Write(str)
@@ -58,7 +58,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		res["message"] = str
 		jsonstr, err := json.Marshal(res)
 		if err != nil {
-			error(err)
+			//error(err)
 			return
 		}
 		w.Write(jsonstr)
