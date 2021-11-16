@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
-	"net/mail"
+	"os"
 	"strings"
 
 	"github.com/go-pg/pg"
 	"golang.org/x/crypto/bcrypt"
+	"project1.com/project/passemailvalidation"
 )
 
 type Registration struct {
@@ -23,99 +25,91 @@ type Registration struct {
 
 var res = map[string]string{"message": ""}
 
+//displays errors to user end
+func error(res map[string]string, w http.ResponseWriter) {
+	jsonstr, _ := json.Marshal(res)
+	w.Write(jsonstr)
+}
+
+func logfile(w http.ResponseWriter) (*os.File, bool) {
+	file, err := os.OpenFile("logs.txt", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644) //opening a log file
+	defer file.Close()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		res["message"] = "Something wrong in backend..Cant Open Log file"
+		error(res, w)
+		return nil, true
+	}
+	return file, false
+}
+
 //registers the user data to the table registration in database
 func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
-
+	file, flag := logfile(w)
+	if flag {
+		return
+	}
+	log.SetOutput(file)               //setting output destination
 	detail, err := io.ReadAll(r.Body) //reads the request body and returns byte value
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Failed to read request body!!!"
-		jsonstr, _ := json.Marshal(res)
-		w.Write(jsonstr)
+		error(res, w)
+		log.Print(err)
 		return
 	}
 	var det Registration
 	err = json.Unmarshal(detail, &det) //converts json format to struct
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend..Cant convert json to struct"
-		jsonstr, _ := json.Marshal(res)
-		w.Write(jsonstr)
+		error(res, w)
+		log.Print(err)
 		return
 	}
-	if det.Firstname == "" || det.Lastname == "" || det.Username == "" || det.Password == "" || det.Email == "" {
+	//validation
+	if det.Firstname == "" || det.Firstname == " " || det.Lastname == " " || det.Lastname == "" || det.Username == " " ||
+		det.Username == "" || det.Password == " " || det.Password == "" || det.Email == " " || det.Email == "" {
+		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
-		jsonstr, _ := json.Marshal(res)
-		w.Write(jsonstr)
+		error(res, w)
 		return
 	}
-
-	_, err = mail.ParseAddress(det.Email)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		res["message"] = "Please Enter valid email ID"
-		jsonstr, _ := json.Marshal(res)
-		w.Write(jsonstr)
+	if flag := passemailvalidation.Passwordvalidation(res, det.Password, w); flag {
+		fmt.Print("hello")
 		return
 	}
-
-	/*passwordvalidator := validator.New(validator.MinLength(8, errors.New("too short")),
-		validator.ContainsAtLeast("abcdefghijklmnopqrstuvwxyz", 2, errors.New("Contain atleast 2 lowercase")),
-		validator.ContainsAtLeast("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 2, errors.New("Contain atleast 2 Uppercase")),
-		validator.ContainsAtLeast("1234567890", 1, errors.New("Contain atleast 1 Numbers")),
-		validator.ContainsAtLeast("@$!%*#?&", 1, errors.New("Should Contain atleast 1 Special Charecter")))
-	err = passwordvalidator.Validate(det.Password)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		str := fmt.Sprintf("%s,Note:Password Should contain Atleast 2 Uppercase,Lowercase And 1 Numbers,Special Char", err.Error())
-		res["message"] = str
-		jsonstr, _ := json.Marshal(res)
-		w.Write(jsonstr)
+	if flag := passemailvalidation.Emailvalidation(res, det.Email, w); flag {
 		return
-	}*/
-	//re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-	/*_, err = regexp.MatchString("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", det.Email)
-	if err != nil {
-		error(err)
-		return
-	}*/
-	//re := regexp.MustCompile("^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[@$!%*#?&])[A-Za-z0-9@$!%*#?&]{8,}$")
-	/*if _, err = regexp.MatchString("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[*.!@$%^&(){}[]:;<>,.?/~_+-=|\\]).{8,32}$", det.Password); err != nil {
-		//error(err)
-		fmt.Println(err)
-		return
-	}*/
-
+	}
+	//encrption of password
 	bytes, err := bcrypt.GenerateFromPassword([]byte(det.Password), 10) //Encryption of password feild to bytes
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend...Failed to encrypt password"
-		jsonstr, _ := json.Marshal(res)
-		w.Write(jsonstr)
+		error(res, w)
+		log.Print(err)
 		return
 	}
 	det.Password = string(bytes)     //converts byte to string and update the feild of password
 	_, err = db.Model(&det).Insert() //query to Insert the data into database
-
+	//checks wheather username or email exists
 	if err != nil {
 		w.WriteHeader(http.StatusAlreadyReported)
 		str := err.Error()
 		last := str[strings.LastIndex(str, " ")+2 : strings.LastIndex(str, " ")+25]
 		if last == "registrations_email_key" {
 			res["message"] = "Email-Id is already registered"
-			jsonstr, _ := json.Marshal(res)
-			w.Write(jsonstr)
+			error(res, w)
 		} else {
 			res["message"] = "Username is already registered"
-			jsonstr, _ := json.Marshal(res)
-			w.Write(jsonstr)
+			error(res, w)
 		}
-
+		log.Print(err)
 	} else {
 		w.WriteHeader(http.StatusCreated)
 		str := fmt.Sprintf("%s successfully registered", det.Username)
 		res["message"] = str
-		jsonstr, _ := json.Marshal(res)
-		//fmt.Fprint(w, string(jsonstr))
-		w.Write(jsonstr)
-
+		error(res, w)
 	}
 }

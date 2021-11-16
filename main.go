@@ -24,6 +24,7 @@ func handlerequest(db *pg.DB) {
 	mux := mux.NewRouter()
 	mux.HandleFunc("/registration", func(rw http.ResponseWriter, r *http.Request) { endpoints.PostRegistration(rw, r, db) }).Methods("POST")
 	mux.HandleFunc("/login", func(rw http.ResponseWriter, r *http.Request) { endpoints.Login(rw, r, db) }).Methods("POST")
+	mux.HandleFunc("/reset", func(rw http.ResponseWriter, r *http.Request) { endpoints.Reset(rw, r, db) }).Methods("POST")
 	err := http.ListenAndServe(":8081", mux)
 	error(err)
 
