@@ -6,10 +6,10 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/go-pg/pg"
+	"project1.com/project/logsetup"
 	"project1.com/project/validation"
 )
 
@@ -31,21 +31,10 @@ func error(res map[string]string, w http.ResponseWriter) {
 	w.Write(jsonstr)
 }
 
-func logfile(w http.ResponseWriter) (*os.File, bool) {
-	file, err := os.OpenFile("logs.txt", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644) //opening a log file
-	defer file.Close()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		res["message"] = "Something wrong in backend..Cant Open Log file"
-		error(res, w)
-		return nil, true
-	}
-	return file, false
-}
-
 //registers the user data to the table registration in database
 func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
-	file, flag := logfile(w)
+	file, flag := logsetup.Logfile(w, res)
+	defer file.Close()
 	if flag {
 		return
 	}
@@ -55,7 +44,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Failed to read request body!!!"
 		error(res, w)
-		log.Print(err)
+		log.Println(err)
 		return
 	}
 	var det Registration
@@ -64,7 +53,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend..Cant convert json to struct"
 		error(res, w)
-		log.Print(err)
+		log.Println(err)
 		return
 	}
 	//validation
@@ -76,7 +65,6 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	if flag := validation.Passwordvalidation(res, det.Password, w); flag {
-		fmt.Print("hello")
 		return
 	}
 	if flag := validation.Emailvalidation(res, det.Email, w); flag {
@@ -100,7 +88,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 			res["message"] = "Username is already registered"
 			error(res, w)
 		}
-		log.Print(err)
+		log.Println(err)
 	} else {
 		w.WriteHeader(http.StatusCreated)
 		str := fmt.Sprintf("%s successfully registered", det.Username)

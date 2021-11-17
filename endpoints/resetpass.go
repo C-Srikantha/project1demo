@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-pg/pg"
 	"golang.org/x/crypto/bcrypt"
+	"project1.com/project/logsetup"
 	"project1.com/project/validation"
 )
 
@@ -18,7 +19,8 @@ type Resetpass struct {
 }
 
 func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
-	file, flag := logfile(w)
+	file, flag := logsetup.Logfile(w, res)
+	defer file.Close()
 	if flag {
 		return
 	}
@@ -86,8 +88,6 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusCreated)
 		res["message"] = "Password reset success"
 		error(res, w)
-		log.Println(err)
-
 	}
 
 }

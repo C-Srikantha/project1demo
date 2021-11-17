@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-pg/pg"
 	"golang.org/x/crypto/bcrypt"
+	"project1.com/project/logsetup"
 )
 
 type Logininfo struct {
@@ -18,7 +19,8 @@ type Logininfo struct {
 
 //checks user is present and allows user to login is password matches in db
 func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
-	file, flag := logfile(w)
+	file, flag := logsetup.Logfile(w, res)
+	defer file.Close()
 	if flag {
 		return
 	}

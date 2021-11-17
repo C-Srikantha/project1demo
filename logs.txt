@@ -1,7 +1,3 @@
-2021/11/16 12:08:18 <nil>
-2021/11/16 12:13:44 ERROR #23505 duplicate key value violates unique constraint "registrations_username_key"
-2021/11/16 12:15:39 ERROR #23505 duplicate key value violates unique constraint "registrations_username_key"
-2021/11/16 12:44:18 pg: no rows in result set
-2021/11/16 12:44:31 pg: no rows in result set
-2021/11/16 14:10:08 ERROR #23505 duplicate key value violates unique constraint "registrations_username_key"
-2021/11/16 14:10:21 Contain atleast 2 lowercase
+2021/11/17 11:48:07 too short
+2021/11/17 11:53:08 mail: missing '@' or angle-addr
+2021/11/17 11:53:16 mail: missing '@' or angle-addr
