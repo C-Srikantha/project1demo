@@ -7,7 +7,8 @@ import (
 	"net/http"
 
 	"github.com/go-pg/pg"
-	"project1.com/project/passemailvalidation"
+	"golang.org/x/crypto/bcrypt"
+	"project1.com/project/validation"
 )
 
 type Resetpass struct {
@@ -49,7 +50,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		log.Println(err)
 		return
 	}
-	if flag := passemailvalidation.Passwordvalidation(res, det.Newpassword, w); flag {
+	if flag := validation.Passwordvalidation(res, det.Newpassword, w); flag {
 		return
 	}
 	//Username exist or not
@@ -61,14 +62,19 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		log.Println(err)
 		return
 	}
-	//Checking Oldpassword is matches with database
+	err = bcrypt.CompareHashAndPassword([]byte(det1.Password), []byte(det.Oldpassword)) //decrypt password
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
 		res["message"] = "Oldpassword is wrong!!!"
 		error(res, w)
 		log.Println(err)
 		return
 	}
+	//Encryption of password
+	if bytes = validation.Encrption(det.Newpassword, w, res); bytes == nil {
+		return
+	}
+	det.Newpassword = string(bytes)
 	//updating password into database
 	_, err = db.Model(&det1).Set("password=?", det.Newpassword).Where("username=?", det.Username).Update()
 	if err != nil {

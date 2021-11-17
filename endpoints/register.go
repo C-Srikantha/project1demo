@@ -10,8 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-pg/pg"
-	"golang.org/x/crypto/bcrypt"
-	"project1.com/project/passemailvalidation"
+	"project1.com/project/validation"
 )
 
 type Registration struct {
@@ -24,6 +23,7 @@ type Registration struct {
 }
 
 var res = map[string]string{"message": ""}
+var bytes []byte
 
 //displays errors to user end
 func error(res map[string]string, w http.ResponseWriter) {
@@ -75,20 +75,15 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		error(res, w)
 		return
 	}
-	if flag := passemailvalidation.Passwordvalidation(res, det.Password, w); flag {
+	if flag := validation.Passwordvalidation(res, det.Password, w); flag {
 		fmt.Print("hello")
 		return
 	}
-	if flag := passemailvalidation.Emailvalidation(res, det.Email, w); flag {
+	if flag := validation.Emailvalidation(res, det.Email, w); flag {
 		return
 	}
 	//encrption of password
-	bytes, err := bcrypt.GenerateFromPassword([]byte(det.Password), 10) //Encryption of password feild to bytes
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		res["message"] = "Something wrong in backend...Failed to encrypt password"
-		error(res, w)
-		log.Print(err)
+	if bytes = validation.Encrption(det.Password, w, res); bytes == nil {
 		return
 	}
 	det.Password = string(bytes)     //converts byte to string and update the feild of password

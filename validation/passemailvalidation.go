@@ -1,4 +1,4 @@
-package passemailvalidation
+package validation
 
 import (
 	"encoding/json"
