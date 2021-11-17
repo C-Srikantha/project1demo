@@ -14,7 +14,7 @@ import (
 
 type Resetpass struct {
 	Username    string
-	Oldpassword string
+	Otp         string
 	Newpassword string
 }
 
@@ -44,7 +44,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	//validation
-	if det.Username == "" || det.Username == " " || det.Oldpassword == "" || det.Oldpassword == " " ||
+	if det.Username == "" || det.Username == " " || det.Otp == "" || det.Otp == " " ||
 		det.Newpassword == "" || det.Newpassword == " " {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
@@ -64,26 +64,26 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		log.Println(err)
 		return
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(det1.Password), []byte(det.Oldpassword)) //decrypt password
+	err = bcrypt.CompareHashAndPassword([]byte(det1.Otp), []byte(det.Otp))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
-		res["message"] = "Oldpassword is wrong!!!"
+		res["message"] = "OTP Entered is wrong!!!"
 		error(res, w)
-		log.Println(err)
+		log.Print(err.Error())
 		return
 	}
+
 	//Encryption of password
 	if bytes = validation.Encrption(det.Newpassword, w, res); bytes == nil {
 		return
 	}
-	det.Newpassword = string(bytes)
 	//updating password into database
-	_, err = db.Model(&det1).Set("password=?", det.Newpassword).Where("username=?", det.Username).Update()
+	_, err = db.Model(&det1).Set("password=?", string(det.Newpassword)).Where("username=?", det.Username).Update()
 	if err != nil {
 		w.WriteHeader(http.StatusNotModified)
 		res["message"] = "Password reset failed"
 		error(res, w)
-		log.Println(err)
+		log.Println(err.Error())
 	} else {
 		w.WriteHeader(http.StatusCreated)
 		res["message"] = "Password reset success"

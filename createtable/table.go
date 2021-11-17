@@ -13,6 +13,7 @@ type Registration struct {
 	Username  string `sql:",unique"`
 	Password  string
 	Email     string `sql:",unique"`
+	Otp       string
 }
 
 //Creates tabel in database and returns error

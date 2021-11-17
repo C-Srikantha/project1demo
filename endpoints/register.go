@@ -20,6 +20,7 @@ type Registration struct {
 	Username  string
 	Password  string
 	Email     string
+	Otp       string
 }
 
 var res = map[string]string{"message": ""}
