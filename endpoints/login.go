@@ -30,7 +30,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Failed to read request body!!!"
 		error(res, w)
-		log.Print(err)
+		log.Print(err.Error())
 		return
 	}
 	var det Logininfo
@@ -40,7 +40,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend..Cant convert json to struct"
 		error(res, w)
-		log.Print(err)
+		log.Print(err.Error())
 		return
 	}
 	err = db.Model(&det1).Where("username=?", det.Username).Select()
@@ -48,7 +48,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusNotFound)
 		res["message"] = "No User Found"
 		error(res, w)
-		log.Print(err)
+		log.Print(err.Error())
 		return
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(det1.Password), []byte(det.Password)) //decrypt password
@@ -56,7 +56,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
 		res["message"] = "Entered password is wrong!!!"
 		error(res, w)
-		log.Print(err)
+		log.Print(err.Error())
 		return
 	} else {
 		str := fmt.Sprintf("%s Welcome", det.Username)

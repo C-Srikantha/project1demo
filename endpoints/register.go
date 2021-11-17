@@ -45,7 +45,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Failed to read request body!!!"
 		error(res, w)
-		log.Println(err)
+		log.Println(err.Error())
 		return
 	}
 	var det Registration
@@ -54,7 +54,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend..Cant convert json to struct"
 		error(res, w)
-		log.Println(err)
+		log.Println(err.Error())
 		return
 	}
 	//validation
@@ -89,7 +89,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 			res["message"] = "Username is already registered"
 			error(res, w)
 		}
-		log.Println(err)
+		log.Println(err.Error())
 	} else {
 		w.WriteHeader(http.StatusCreated)
 		str := fmt.Sprintf("%s successfully registered", det.Username)

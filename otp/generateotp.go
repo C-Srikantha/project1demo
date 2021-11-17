@@ -2,25 +2,30 @@ package otp
 
 import (
 	"crypto/rand"
+	"encoding/csv"
 	"fmt"
 	"io"
 	"net/smtp"
+	"os"
 )
 
 const otp = "1234567890"
 
-func Generateotp(email string) string {
+func Generateotp(email string) (string, bool) {
+	//generating random numbers of len 6
 	b := make([]byte, 6)
 	_, err := io.ReadAtLeast(rand.Reader, b, 6)
 	if err != nil {
-		fmt.Println(err)
+		return err.Error(), true
 	}
 	for i := 0; i < len(b); i++ {
 		b[i] = otp[int(b[i])%len(otp)]
 	}
-	//	fmt.Print(string(b))
-	from := "scgamer1401@gmail.com"
-	password := "Cs@8722552149"
+	file, _ := os.Open("creditials.csv")
+	csvfile := csv.NewReader(file)
+	det, err := csvfile.Read()
+	from := det[0]
+	password := det[1]
 	to := []string{
 		email,
 	}
@@ -33,8 +38,7 @@ func Generateotp(email string) string {
 	// Sending email.
 	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
 	if err != nil {
-		fmt.Println(err)
-		return ""
+		return err.Error(), true
 	}
-	return string(b)
+	return string(b), false
 }

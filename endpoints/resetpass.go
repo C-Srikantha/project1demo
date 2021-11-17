@@ -25,12 +25,13 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	log.SetOutput(file) //setting output destination
+	//reading body
 	detail, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Failed to read request body!!!"
 		error(res, w)
-		log.Println(err)
+		log.Println(err.Error())
 		return
 	}
 	var det Resetpass
@@ -40,7 +41,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend..Cant convert json to struct"
 		error(res, w)
-		log.Println(err)
+		log.Println(err.Error())
 		return
 	}
 	//validation
@@ -49,7 +50,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
 		error(res, w)
-		log.Println(err)
+		log.Println(err.Error())
 		return
 	}
 	if flag := validation.Passwordvalidation(res, det.Newpassword, w); flag {
@@ -59,11 +60,12 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	err = db.Model(&det1).Where("username=?", det.Username).Select()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		res["message"] = "Please enter valid Username and Pass"
+		res["message"] = "Please enter valid Username "
 		error(res, w)
-		log.Println(err)
+		log.Println(err.Error())
 		return
 	}
+	//checks otp matches with database
 	err = bcrypt.CompareHashAndPassword([]byte(det1.Otp), []byte(det.Otp))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
@@ -78,7 +80,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	//updating password into database
-	_, err = db.Model(&det1).Set("password=?", string(det.Newpassword)).Where("username=?", det.Username).Update()
+	_, err = db.Model(&det1).Set("password=?", string(bytes)).Where("username=?", det.Username).Update()
 	if err != nil {
 		w.WriteHeader(http.StatusNotModified)
 		res["message"] = "Password reset failed"

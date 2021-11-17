@@ -16,13 +16,17 @@ func error(res map[string]string, w http.ResponseWriter) {
 	jsonstr, _ := json.Marshal(res)
 	w.Write(jsonstr)
 }
+
+//validation of password
 func Passwordvalidation(res map[string]string, password string, w http.ResponseWriter) bool {
+	//logfile
 	file, flag := logsetup.Logfile(w, res)
 	defer file.Close()
 	if flag {
 		return true
 	}
 	log.SetOutput(file)
+	//password validation
 	passwordvalidator := validator.New(validator.MinLength(8, errors.New("too short")),
 		validator.ContainsAtLeast("abcdefghijklmnopqrstuvwxyz", 2, errors.New("Contain atleast 2 lowercase")),
 		validator.ContainsAtLeast("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 2, errors.New("Contain atleast 2 Uppercase")),
@@ -39,6 +43,8 @@ func Passwordvalidation(res map[string]string, password string, w http.ResponseW
 	}
 	return false
 }
+
+//Email valdation
 func Emailvalidation(res map[string]string, email string, w http.ResponseWriter) bool {
 	file, flag := logsetup.Logfile(w, res)
 	defer file.Close()
@@ -52,7 +58,7 @@ func Emailvalidation(res map[string]string, email string, w http.ResponseWriter)
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter valid email ID"
 		error(res, w)
-		log.Print(err)
+		log.Print(err.Error())
 		return true
 	}
 	return false
