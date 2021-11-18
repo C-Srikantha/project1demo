@@ -20,7 +20,7 @@ func Encrption(password string, w http.ResponseWriter, res map[string]string) []
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend...Failed to encrypt password"
-		error(res, w)
+		display(res, w)
 		log.Println(err.Error())
 		return nil
 	}

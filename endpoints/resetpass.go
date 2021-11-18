@@ -3,10 +3,10 @@ package endpoints
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/go-pg/pg"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"project1.com/project/logsetup"
 	"project1.com/project/validation"
@@ -20,18 +20,18 @@ type Resetpass struct {
 
 func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	file, flag := logsetup.Logfile(w, res)
-	defer file.Close()
 	if flag {
 		return
 	}
+	defer file.Close()
 	log.SetOutput(file) //setting output destination
 	//reading body
 	detail, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Failed to read request body!!!"
-		error(res, w)
-		log.Println(err.Error())
+		display(res, w)
+		log.Error(err)
 		return
 	}
 	var det Resetpass
@@ -40,8 +40,8 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend..Cant convert json to struct"
-		error(res, w)
-		log.Println(err.Error())
+		display(res, w)
+		log.Error(err)
 		return
 	}
 	//validation
@@ -49,8 +49,8 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		det.Newpassword == "" || det.Newpassword == " " {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
-		error(res, w)
-		log.Println(err.Error())
+		display(res, w)
+		log.Warn(res["message"])
 		return
 	}
 	if flag := validation.Passwordvalidation(res, det.Newpassword, w); flag {
@@ -61,8 +61,8 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please enter valid Username "
-		error(res, w)
-		log.Println(err.Error())
+		display(res, w)
+		log.Warn(err)
 		return
 	}
 	//checks otp matches with database
@@ -70,26 +70,27 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
 		res["message"] = "OTP Entered is wrong!!!"
-		error(res, w)
-		log.Print(err.Error())
+		display(res, w)
+		log.Warn(err)
 		return
 	}
 
 	//Encryption of password
-	if bytes = validation.Encrption(det.Newpassword, w, res); bytes == nil {
+	if bytepass = validation.Encrption(det.Newpassword, w, res); bytepass == nil {
 		return
 	}
 	//updating password into database
-	_, err = db.Model(&det1).Set("password=?", string(bytes)).Where("username=?", det.Username).Update()
+	_, err = db.Model(&det1).Set("password=?", string(bytepass)).Where("username=?", det.Username).Update()
 	if err != nil {
 		w.WriteHeader(http.StatusNotModified)
 		res["message"] = "Password reset failed"
-		error(res, w)
-		log.Println(err.Error())
+		display(res, w)
+		log.Error(err)
 	} else {
 		w.WriteHeader(http.StatusCreated)
 		res["message"] = "Password reset success"
-		error(res, w)
+		display(res, w)
+		log.Info(res["message"])
 	}
 
 }

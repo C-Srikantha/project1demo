@@ -1,7 +1,0 @@
-2021/11/17 11:48:07 too short
-2021/11/17 11:53:08 mail: missing '@' or angle-addr
-2021/11/17 11:53:16 mail: missing '@' or angle-addr
-2021/11/17 13:42:41 <nil>
-2021/11/17 13:42:50 <nil>
-2021/11/17 15:39:23 crypto/bcrypt: hashedSecret too short to be a bcrypted password
-2021/11/17 16:12:16 Contain atleast 2 Uppercase

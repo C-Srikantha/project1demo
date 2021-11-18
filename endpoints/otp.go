@@ -3,10 +3,11 @@ package endpoints
 import (
 	"encoding/json"
 	"io"
-	"log"
+
 	"net/http"
 
 	"github.com/go-pg/pg"
+	log "github.com/sirupsen/logrus"
 	"project1.com/project/logsetup"
 	"project1.com/project/otp"
 	"project1.com/project/validation"
@@ -18,17 +19,18 @@ type Resetpassword struct {
 
 func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	file, flag := logsetup.Logfile(w, res)
-	defer file.Close()
 	if flag {
 		return
 	}
+	defer file.Close()
+	log.SetOutput(file)
 	//reads username from body
 	detail, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Failed to read request body!!!"
-		error(res, w)
-		log.Println(err.Error())
+		display(res, w)
+		log.Error(err)
 		return
 	}
 	var det Resetpassword
@@ -37,15 +39,16 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend..Cant convert json to struct"
-		error(res, w)
-		log.Println(err.Error())
+		display(res, w)
+		log.Error(err)
 		return
 	}
 	//validation
 	if det.Username == "" || det.Username == " " {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
-		error(res, w)
+		display(res, w)
+		log.Info(res["message"])
 		return
 	}
 	//checks username exists or not
@@ -53,31 +56,42 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		res["message"] = "User Not Found"
-		error(res, w)
-		log.Print(err.Error())
+		display(res, w)
+		log.Warn(err)
 		return
 	}
 	//calling generate otp func
-	otp, flag := otp.Generateotp(det1.Email)
+	otpstr, flag := otp.Generateotp()
 	if flag {
 		w.WriteHeader(http.StatusInternalServerError)
-		res["message"] = "Failed to send mail"
-		error(res, w)
+		res["message"] = "generating otp failed"
+		display(res, w)
+		log.Error(otpstr)
+		return
 	}
 	//encryption of otp
-	if bytes = validation.Encrption(otp, w, res); bytes == nil {
+	if bytepass = validation.Encrption(otpstr, w, res); bytepass == nil {
 		return
 	}
 	//updating otp feild in database
-	_, err = db.Model(&det1).Set("otp=?", string(bytes)).Where("username=?", det.Username).Update()
+	_, err = db.Model(&det1).Set("otp=?", string(bytepass)).Where("username=?", det.Username).Update()
 	if err != nil {
 		w.WriteHeader(http.StatusNotModified)
-		res["message"] = "Something wrong in backend"
-		error(res, w)
-		log.Println(err.Error())
+		res["message"] = "Something wrong in backend..Failed to update pass"
+		display(res, w)
+		log.Error(err)
 	} else {
 		w.WriteHeader(http.StatusCreated)
+		if err := otp.Emailgenerate(det1.Email, otpstr); err != nil {
+			w.WriteHeader(http.StatusNotModified)
+			res["message"] = "Failed to send mail"
+			display(res, w)
+			log.Error(err)
+			return
+		}
 		res["message"] = "Otp has sent via mail"
-		error(res, w)
+		display(res, w)
+		log.Info(res["message"])
 	}
+
 }

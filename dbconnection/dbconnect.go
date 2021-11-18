@@ -18,4 +18,5 @@ func DatabaseConnection() (*pg.DB, error) {
 	control := context.Background()
 	_, err := connection.ExecContext(control, "SELECT 1")
 	return connection, err
+
 }

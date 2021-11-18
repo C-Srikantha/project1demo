@@ -11,7 +11,7 @@ import (
 
 const otp = "1234567890"
 
-func Generateotp(email string) (string, bool) {
+func Generateotp() (string, bool) {
 	//generating random numbers of len 6
 	b := make([]byte, 6)
 	_, err := io.ReadAtLeast(rand.Reader, b, 6)
@@ -21,9 +21,12 @@ func Generateotp(email string) (string, bool) {
 	for i := 0; i < len(b); i++ {
 		b[i] = otp[int(b[i])%len(otp)]
 	}
+	return string(b), false
+}
+func Emailgenerate(email, b string) interface{} {
 	file, _ := os.Open("creditials.csv")
 	csvfile := csv.NewReader(file)
-	det, err := csvfile.Read()
+	det, _ := csvfile.Read()
 	from := det[0]
 	password := det[1]
 	to := []string{
@@ -31,14 +34,14 @@ func Generateotp(email string) (string, bool) {
 	}
 	smtpHost := "smtp.gmail.com"
 	smtpPort := "587"
-	str := fmt.Sprintf("The Generated OTP is %s", string(b))
+	str := fmt.Sprintf("The Generated OTP is %s", b)
 	message := []byte(str)
-	auth := smtp.PlainAuth("", from, password, smtpHost)
+	auth := smtp.PlainAuth("", from, password, smtpHost) //
 
 	// Sending email.
-	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
 	if err != nil {
-		return err.Error(), true
+		return err
 	}
-	return string(b), false
+	return err
 }
