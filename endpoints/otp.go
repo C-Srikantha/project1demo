@@ -1,14 +1,12 @@
 package endpoints
 
 import (
-	"encoding/json"
-	"io"
-
 	"net/http"
 
 	"github.com/go-pg/pg"
 	"github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
+	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/logsetup"
 	"project1.com/project/otp"
 	"project1.com/project/validation"
@@ -25,8 +23,13 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	}
 	defer file.Close()
 	log.SetOutput(file)
+	var det *Resetpassword
+	var det1 Registration
 	//reads username from body
-	detail, err := io.ReadAll(r.Body)
+	if err := read.Readbody(r, w, res, &det); err != nil {
+		return
+	}
+	/*detail, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Failed to read request body!!!"
@@ -43,9 +46,9 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		display(res, w)
 		log.Error(err)
 		return
-	}
+	}*/
 	//validation
-	if err = validator.Validate(det); err != nil {
+	if err := validator.Validate(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
 		display(res, w)
@@ -53,7 +56,7 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	//checks username exists or not
-	err = db.Model(&det1).Where("username=?", det.Username).Select()
+	err := db.Model(&det1).Where("username=?", det.Username).Select()
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		res["message"] = "User Not Found"

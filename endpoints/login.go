@@ -1,9 +1,7 @@
 package endpoints
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 
 	"net/http"
 
@@ -11,6 +9,7 @@ import (
 	"github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
+	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/logsetup"
 )
 
@@ -27,7 +26,13 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	}
 	defer file.Close()
 	log.SetOutput(file) //setting output destination
-	detail, err := io.ReadAll(r.Body)
+	var det *Logininfo
+	var det1 Registration
+	if err := read.Readbody(r, w, res, &det); err != nil {
+		return
+	}
+
+	/*detail, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Failed to read request body!!!"
@@ -44,15 +49,15 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		display(res, w)
 		log.Error(err)
 		return
-	}
-	if err = validator.Validate(det); err != nil {
+	}*/
+	if err := validator.Validate(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please enter all details"
 		display(res, w)
 		log.Warn(err)
 		return
 	}
-	err = db.Model(&det1).Where("username=?", det.Username).Select()
+	err := db.Model(&det1).Where("username=?", det.Username).Select()
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		res["message"] = "No User Found"

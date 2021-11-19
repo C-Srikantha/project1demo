@@ -3,13 +3,13 @@ package endpoints
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 
 	"github.com/go-pg/pg"
 	"github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
+	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/logsetup"
 	"project1.com/project/validation"
 )
@@ -39,26 +39,22 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if flag {
 		return
 	}
-	log.SetOutput(file)               //setting output destination
-	detail, err := io.ReadAll(r.Body) //reads the request body and returns byte value
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		res["message"] = "Failed to read request body!!!"
-		display(res, w)
-		log.Error(err)
+	log.SetOutput(file) //setting log output destination
+	var det *Registration
+	if err := read.Readbody(r, w, res, &det); err != nil { //calling Readbody for reading requestbody
 		return
 	}
-	var det Registration
-	err = json.Unmarshal(detail, &det) //converts json format to struct
+
+	/*err = json.Unmarshal(detail, &det) //converts json format to struct
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend..Cant convert json to struct"
 		display(res, w)
 		log.Error(err)
 		return
-	}
+	}*/
 	//validation
-	if err = validator.Validate(det); err != nil {
+	if err := validator.Validate(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
 		display(res, w)
@@ -76,7 +72,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	det.Password = string(bytepass)  //converts byte to string and update the feild of password
-	_, err = db.Model(&det).Insert() //query to Insert the data into database
+	_, err := db.Model(det).Insert() //query to Insert the data into database
 	//checks wheather username or email exists
 	if err != nil {
 		str := err.Error()
