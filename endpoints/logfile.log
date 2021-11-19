@@ -1,0 +1,8 @@
+time="19-11-2021 16:56:08" level=info msg="sriki successfully registered"
+time="19-11-2021 16:56:08" level=warning msg="Username is already registered"
+time="19-11-2021 16:56:08" level=error msg="ERROR #23505 duplicate key value violates unique constraint \"registrations_username_key\""
+time="19-11-2021 16:56:08" level=warning msg="Please Enter all the details"
+time="19-11-2021 16:56:08" level=info msg="hello successfully registered"
+time="19-11-2021 16:56:08" level=warning msg="too short"
+time="19-11-2021 16:56:08" level=warning msg="mail: missing '@' or angle-addr"
+time="19-11-2021 16:56:08" level=info msg="sriki Welcome"

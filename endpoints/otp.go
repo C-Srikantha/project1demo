@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
+	users "project1.com/project/display_to_user_end"
 	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/logsetup"
 	"project1.com/project/otp"
@@ -63,7 +64,7 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		res["message"] = "User Not Found"
-		display(res, w)
+		users.Display(res, w)
 		log.Warn(err)
 		return
 	}
@@ -72,7 +73,7 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if flag {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "generating otp failed"
-		display(res, w)
+		users.Display(res, w)
 		log.Error(otpstr)
 		return
 	}
@@ -85,19 +86,19 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusNotModified)
 		res["message"] = "Something wrong in backend..Failed to update pass"
-		display(res, w)
+		users.Display(res, w)
 		log.Error(err)
 	} else {
 		w.WriteHeader(http.StatusCreated)
 		if err := otp.Emailgenerate(det1.Email, otpstr); err != nil {
 			w.WriteHeader(http.StatusNotModified)
 			res["message"] = "Failed to send mail"
-			display(res, w)
+			users.Display(res, w)
 			log.Error(err)
 			return
 		}
 		res["message"] = "Otp has sent via mail"
-		display(res, w)
+		users.Display(res, w)
 		log.Info(res["message"])
 	}
 

@@ -1,13 +1,13 @@
 package endpoints
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
+	users "project1.com/project/display_to_user_end"
 	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/logsetup"
 	"project1.com/project/validation"
@@ -27,10 +27,10 @@ var res = map[string]string{"message": ""}
 var bytepass []byte
 
 //displays errors to user end
-func display(res map[string]string, w http.ResponseWriter) {
+/*func display(res map[string]string, w http.ResponseWriter) {
 	jsonstr, _ := json.Marshal(res)
 	w.Write(jsonstr)
-}
+}*/
 
 //registers the user data to the table registration in database
 func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
@@ -82,11 +82,11 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		last := str[strings.LastIndex(str, " ")+2 : strings.LastIndex(str, " ")+25]
 		if last == "registrations_email_key" {
 			res["message"] = "Email-Id is already registered"
-			display(res, w)
+			users.Display(res, w)
 			log.Warn(res["message"])
 		} else {
 			res["message"] = "Username is already registered"
-			display(res, w)
+			users.Display(res, w)
 			log.Warn(res["message"])
 		}
 		log.Error(err)
@@ -94,7 +94,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusCreated)
 		str := fmt.Sprintf("%s successfully registered", det.Username)
 		res["message"] = str
-		display(res, w)
+		users.Display(res, w)
 		log.Info(str)
 	}
 }

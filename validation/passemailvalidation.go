@@ -1,7 +1,6 @@
 package validation
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,17 +9,19 @@ import (
 	"github.com/go-passwd/validator"
 	valid "github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
+	users "project1.com/project/display_to_user_end"
 )
 
-func display(res map[string]string, w http.ResponseWriter) {
+/*func display(res map[string]string, w http.ResponseWriter) {
 	jsonstr, _ := json.Marshal(res)
 	w.Write(jsonstr)
-}
+}*/
+//validation of feilds wheather empty or not
 func FeildValidation(det interface{}, w http.ResponseWriter, res map[string]string) error {
 	if err := valid.Validate(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
-		display(res, w)
+		users.Display(res, w)
 		log.Warn(res["message"])
 		return err
 	}
@@ -39,7 +40,7 @@ func Passwordvalidation(res map[string]string, password string, w http.ResponseW
 		w.WriteHeader(http.StatusBadRequest)
 		str := fmt.Sprintf("%s,Note:Password Should contain Atleast 2 Uppercase,Lowercase And 1 Number,Special Char", err.Error())
 		res["message"] = str
-		display(res, w)
+		users.Display(res, w)
 		log.Warn(err)
 		return true
 	}
@@ -52,7 +53,7 @@ func Emailvalidation(res map[string]string, email string, w http.ResponseWriter)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter valid email ID"
-		display(res, w)
+		users.Display(res, w)
 		log.Warn(err)
 		return true
 	}

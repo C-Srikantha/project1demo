@@ -8,6 +8,7 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
+	users "project1.com/project/display_to_user_end"
 	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/logsetup"
 	"project1.com/project/validation"
@@ -66,7 +67,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		res["message"] = "No User Found"
-		display(res, w)
+		users.Display(res, w)
 		log.Error(err)
 		return
 	}
@@ -74,13 +75,13 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
 		res["message"] = "Entered password is wrong!!!"
-		display(res, w)
+		users.Display(res, w)
 		log.Warn(err)
 	} else {
 		w.WriteHeader(http.StatusFound)
 		str := fmt.Sprintf("%s Welcome", det.Username)
 		res["message"] = str
-		display(res, w)
+		users.Display(res, w)
 		log.Info(str)
 	}
 

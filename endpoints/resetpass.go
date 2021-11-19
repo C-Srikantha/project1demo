@@ -6,6 +6,7 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
+	users "project1.com/project/display_to_user_end"
 	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/logsetup"
 	"project1.com/project/validation"
@@ -64,11 +65,11 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	//Username exist or not
-	err := db.Model(&det1).Where("username=?", det.Username).Select()
+	err := db.Model(&det1).Where("username=?", det.Username).Select() //query to check username exist or not
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please enter valid Username "
-		display(res, w)
+		users.Display(res, w)
 		log.Warn(err)
 		return
 	}
@@ -77,7 +78,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
 		res["message"] = "OTP Entered is wrong!!!"
-		display(res, w)
+		users.Display(res, w)
 		log.Warn(err)
 		return
 	}
@@ -91,12 +92,12 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusNotModified)
 		res["message"] = "Password reset failed"
-		display(res, w)
+		users.Display(res, w)
 		log.Error(err)
 	} else {
 		w.WriteHeader(http.StatusCreated)
 		res["message"] = "Password reset success"
-		display(res, w)
+		users.Display(res, w)
 		log.Info(res["message"])
 	}
 

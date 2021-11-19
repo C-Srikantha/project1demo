@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
+	users "project1.com/project/display_to_user_end"
 	"project1.com/project/logsetup"
 )
 
@@ -20,7 +21,7 @@ func Encrption(password string, w http.ResponseWriter, res map[string]string) []
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend...Failed to encrypt password"
-		display(res, w)
+		users.Display(res, w)
 		log.Println(err.Error())
 		return nil
 	}
