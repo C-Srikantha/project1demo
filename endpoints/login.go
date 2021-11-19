@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"github.com/go-pg/pg"
-	"github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/logsetup"
+	"project1.com/project/validation"
 )
 
 type Logininfo struct {
@@ -50,11 +50,16 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		log.Error(err)
 		return
 	}*/
-	if err := validator.Validate(det); err != nil {
+	//validation
+	/*if err := validator.Validate(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please enter all details"
 		display(res, w)
 		log.Warn(err)
+		return
+	}*/
+	//validation
+	if err := validation.FeildValidation(det, w, res); err != nil {
 		return
 	}
 	err := db.Model(&det1).Where("username=?", det.Username).Select()

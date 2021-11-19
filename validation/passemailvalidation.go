@@ -8,12 +8,23 @@ import (
 	"net/mail"
 
 	"github.com/go-passwd/validator"
+	valid "github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
 )
 
 func display(res map[string]string, w http.ResponseWriter) {
 	jsonstr, _ := json.Marshal(res)
 	w.Write(jsonstr)
+}
+func FeildValidation(det interface{}, w http.ResponseWriter, res map[string]string) error {
+	if err := valid.Validate(det); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		res["message"] = "Please Enter all the details"
+		display(res, w)
+		log.Warn(res["message"])
+		return err
+	}
+	return nil
 }
 
 //validation of password

@@ -46,3 +46,4 @@ time="19-11-2021 12:27:27" level=error msg="invalid character '\\t' in string li
 time="19-11-2021 12:27:48" level=info msg="srika Welcome"
 time="19-11-2021 13:51:10" level=warning msg="Username: zero value"
 time="19-11-2021 13:51:22" level=warning msg="Password: zero value, Username: zero value"
+time="19-11-2021 14:31:35" level=warning msg="Please Enter all the details"

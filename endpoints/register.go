@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/go-pg/pg"
-	"github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
 	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/logsetup"
@@ -54,11 +53,14 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}*/
 	//validation
-	if err := validator.Validate(det); err != nil {
+	/*if err := validator.Validate(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
 		display(res, w)
 		log.Warn(res["message"])
+		return
+	}*/
+	if err := validation.FeildValidation(det, w, res); err != nil {
 		return
 	}
 	if flag := validation.Passwordvalidation(res, det.Password, w); flag {
