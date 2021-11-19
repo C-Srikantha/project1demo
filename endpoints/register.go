@@ -39,7 +39,6 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if flag {
 		return
 	}
-	defer file.Close()
 	log.SetOutput(file)               //setting output destination
 	detail, err := io.ReadAll(r.Body) //reads the request body and returns byte value
 	if err != nil {
