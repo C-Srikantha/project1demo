@@ -1,8 +1,0 @@
-time="18-11-2021 17:10:51" level=info msg="sriki successfully registered"
-time="18-11-2021 17:10:51" level=info msg="sriki Welcome"
-time="18-11-2021 17:11:53" level=warning msg="Username is already registered"
-time="18-11-2021 17:11:53" level=error msg="ERROR #23505 duplicate key value violates unique constraint \"registrations_username_key\""
-time="18-11-2021 17:11:53" level=info msg="sriki Welcome"
-time="18-11-2021 17:20:22" level=warning msg="Username is already registered"
-time="18-11-2021 17:20:22" level=error msg="ERROR #23505 duplicate key value violates unique constraint \"registrations_username_key\""
-time="18-11-2021 17:20:22" level=info msg="sriki Welcome"

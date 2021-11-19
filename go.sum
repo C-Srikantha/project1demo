@@ -8,6 +8,8 @@ github.com/go-passwd/validator v0.0.0-20180902184246-0b4c967e436b/go.mod h1:BOKC
 github.com/go-pg/pg v8.0.7+incompatible h1:ty/sXL1OZLo+47KK9N8llRcmbA9tZasqbQ/OO4ld53g=
 github.com/go-pg/pg v8.0.7+incompatible/go.mod h1:a2oXow+aFOrvwcKs3eIA0lNFmMilrxK2sOkB5NWe0vA=
 github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0/go.mod h1:fyg7847qk6SyHyPtNmDHnmrv/HOrqktSC+C9fM+CJOE=
+github.com/go-validator/validator v0.0.0-20210331031555-b37d688a7fb0 h1:t2y4ZEj8purQoaIWOiMJflqFByDe5vdViU8GCDmHPTA=
+github.com/go-validator/validator v0.0.0-20210331031555-b37d688a7fb0/go.mod h1:Z6CPSxOS2fR8d1fAFPKiF/q3d7pRDmLowc7I1l0f4Oc=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/golang/protobuf v1.4.0-rc.1/go.mod h1:ceaxUfeHdC40wWswd/P6IGgMaK3YpKi5j83Wpe3EHw8=
 github.com/golang/protobuf v1.4.0-rc.1.0.20200221234624-67d41d38c208/go.mod h1:xKAWHe0F5eneWXFV3EuXVDTCmh+JuBKY0li0aMyXATA=

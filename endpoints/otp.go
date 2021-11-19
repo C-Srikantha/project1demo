@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-pg/pg"
+	"github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
 	"project1.com/project/logsetup"
 	"project1.com/project/otp"
@@ -14,7 +15,7 @@ import (
 )
 
 type Resetpassword struct {
-	Username string
+	Username string `validate:"nonzero"`
 }
 
 func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
@@ -44,11 +45,11 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	//validation
-	if det.Username == "" || det.Username == " " {
+	if err = validator.Validate(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
 		display(res, w)
-		log.Info(res["message"])
+		log.Warn(res["message"])
 		return
 	}
 	//checks username exists or not

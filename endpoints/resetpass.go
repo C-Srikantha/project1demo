@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-pg/pg"
+	"github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"project1.com/project/logsetup"
@@ -13,9 +14,9 @@ import (
 )
 
 type Resetpass struct {
-	Username    string
-	Otp         string
-	Newpassword string
+	Username    string `validate:"nonzero"`
+	Otp         string `validate:"nonzero"`
+	Newpassword string `validate:"nonzero"`
 }
 
 func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
@@ -45,8 +46,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	//validation
-	if det.Username == "" || det.Username == " " || det.Otp == "" || det.Otp == " " ||
-		det.Newpassword == "" || det.Newpassword == " " {
+	if err = validator.Validate(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
 		display(res, w)

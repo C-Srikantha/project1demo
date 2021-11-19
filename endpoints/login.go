@@ -8,14 +8,15 @@ import (
 	"net/http"
 
 	"github.com/go-pg/pg"
+	"github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"project1.com/project/logsetup"
 )
 
 type Logininfo struct {
-	Username string
-	Password string
+	Username string `validate:"nonzero"`
+	Password string `validate:"nonzero"`
 }
 
 //checks user is present and allows user to login is password matches in db
@@ -42,6 +43,13 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		res["message"] = "Something wrong in backend..Cant convert json to struct"
 		display(res, w)
 		log.Error(err)
+		return
+	}
+	if err = validator.Validate(det); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		res["message"] = "Please enter all details"
+		display(res, w)
+		log.Warn(err)
 		return
 	}
 	err = db.Model(&det1).Where("username=?", det.Username).Select()

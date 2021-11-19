@@ -10,6 +10,7 @@ require (
 
 require (
 	github.com/go-passwd/validator v0.0.0-20180902184246-0b4c967e436b // indirect
+	github.com/go-validator/validator v0.0.0-20210331031555-b37d688a7fb0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/onsi/gomega v1.17.0 // indirect

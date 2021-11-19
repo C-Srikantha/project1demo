@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-pg/pg"
+	"github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
 	"project1.com/project/logsetup"
 	"project1.com/project/validation"
@@ -15,11 +16,11 @@ import (
 
 type Registration struct {
 	Id        int
-	Firstname string
-	Lastname  string
-	Username  string
-	Password  string
-	Email     string
+	Firstname string `validate:"nonzero"`
+	Lastname  string `validate:"nonzero"`
+	Username  string `validate:"nonzero"`
+	Password  string `validate:"nonzero"`
+	Email     string `validate:"nonzero"`
 	Otp       string
 }
 
@@ -38,7 +39,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if flag {
 		return
 	}
-	//defer file.Close()
+	defer file.Close()
 	log.SetOutput(file)               //setting output destination
 	detail, err := io.ReadAll(r.Body) //reads the request body and returns byte value
 	if err != nil {
@@ -58,8 +59,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	//validation
-	if det.Firstname == "" || det.Firstname == " " || det.Lastname == " " || det.Lastname == "" || det.Username == " " ||
-		det.Username == "" || det.Password == " " || det.Password == "" || det.Email == " " || det.Email == "" {
+	if err = validator.Validate(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
 		display(res, w)
