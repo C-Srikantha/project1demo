@@ -23,7 +23,7 @@ func Generateotp() (string, bool) {
 	}
 	return string(b), false
 }
-func Emailgenerate(email, b string) interface{} {
+func Emailgenerate(email, b string) error {
 	file, _ := os.Open("creditials.csv")
 	csvfile := csv.NewReader(file)
 	det, _ := csvfile.Read()
@@ -43,5 +43,5 @@ func Emailgenerate(email, b string) interface{} {
 	if err != nil {
 		return err
 	}
-	return err
+	return nil
 }
