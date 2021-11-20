@@ -8,9 +8,10 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
-	users "project1.com/project/display_to_user_end"
+
 	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/logsetup"
+	"project1.com/project/utility"
 	"project1.com/project/validation"
 )
 
@@ -32,33 +33,6 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err := read.Readbody(r, w, res, &det); err != nil {
 		return
 	}
-
-	/*detail, err := io.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		res["message"] = "Failed to read request body!!!"
-		display(res, w)
-		log.Error(err)
-		return
-	}
-	var det Logininfo
-	var det1 Registration
-	err = json.Unmarshal(detail, &det) //convert json to struct
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		res["message"] = "Something wrong in backend..Cant convert json to struct"
-		display(res, w)
-		log.Error(err)
-		return
-	}*/
-	//validation
-	/*if err := validator.Validate(det); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		res["message"] = "Please enter all details"
-		display(res, w)
-		log.Warn(err)
-		return
-	}*/
 	//validation
 	if err := validation.FeildValidation(det, w, res); err != nil {
 		return
@@ -67,7 +41,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		res["message"] = "No User Found"
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Error(err)
 		return
 	}
@@ -75,13 +49,13 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
 		res["message"] = "Entered password is wrong!!!"
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Warn(err)
 	} else {
 		w.WriteHeader(http.StatusFound)
 		str := fmt.Sprintf("%s Welcome", det.Username)
 		res["message"] = str
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Info(str)
 	}
 

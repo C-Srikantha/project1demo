@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
-	users "project1.com/project/display_to_user_end"
+	"project1.com/project/utility"
 )
 
 //reads the body from request and converts json to struct ...returns err
@@ -15,7 +15,7 @@ func Readbody(r *http.Request, w http.ResponseWriter, res map[string]string, det
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Failed to read request body!!!"
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Error(err)
 		return err
 	}
@@ -23,7 +23,7 @@ func Readbody(r *http.Request, w http.ResponseWriter, res map[string]string, det
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend..Cant convert json to struct"
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Error(err)
 		return err
 	}

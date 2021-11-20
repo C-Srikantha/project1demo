@@ -30,7 +30,19 @@ var login = []Inputs{
 	{[]byte(`{"username":"hello1234","password":"aa@123AA"}`), http.StatusNotFound},
 	{[]byte(`{"username":"sriki","password":"a@123AA"}`), http.StatusUnauthorized},
 }
+var inotp = []Inputs{
+	{[]byte(`{"username":""}`), http.StatusBadRequest},
+	{[]byte(`{"username":"srikantha"}`), http.StatusBadRequest},
+	//{[]byte(`{"username":"sriki"}`), http.StatusCreated},
+}
+var reset = []Inputs{
+	{[]byte(`{"username":"","otp":"","newpassword":""}`), http.StatusBadRequest},
+	{[]byte(`{"username":"sriki","otp":"","newpassword":"sa@123AA"}`), http.StatusBadRequest},
+	{[]byte(`{"username":"sriki","otp":"12345","newpassword":"sa@123AA"}`), http.StatusUnauthorized},
+	{[]byte(`{"username":"srikiantha","otp":"12345","newpassword":"sa@123AA"}`), http.StatusBadRequest},
+}
 
+//test for regester api
 func TestRegister(t *testing.T) {
 	db, _ := dbconnection.DatabaseConnection()
 	for _, val := range reg {
@@ -48,6 +60,8 @@ func TestRegister(t *testing.T) {
 	}
 
 }
+
+//test for login api
 func TestLogin(t *testing.T) {
 	db, _ := dbconnection.DatabaseConnection()
 	for _, val := range login {
@@ -65,4 +79,40 @@ func TestLogin(t *testing.T) {
 		}
 	}
 
+}
+
+//test for otp api
+func TestOtp(t *testing.T) {
+	db, _ := dbconnection.DatabaseConnection()
+	for _, val := range inotp {
+		req, err := http.NewRequest("POST", "/generateotp", bytes.NewBuffer(val.input))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		rr := httptest.NewRecorder()
+		handle := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { Resetpassotp(rw, r, db) })
+		handle.ServeHTTP(rr, req)
+		if statuscode := rr.Code; statuscode != val.wantcode {
+			t.Errorf("got=%v,want=%v", rr.Code, val.wantcode)
+		}
+	}
+}
+
+//test for resetpass api
+func TestReset(t *testing.T) {
+	db, _ := dbconnection.DatabaseConnection()
+	for _, val := range reset {
+		req, err := http.NewRequest("POST", "/reset", bytes.NewBuffer(val.input))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		rr := httptest.NewRecorder()
+		handle := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { Reset(rw, r, db) })
+		handle.ServeHTTP(rr, req)
+		if statuscode := rr.Code; statuscode != val.wantcode {
+			t.Errorf("got=%v,want=%v", rr.Code, val.wantcode)
+		}
+	}
 }

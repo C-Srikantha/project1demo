@@ -9,7 +9,7 @@ import (
 	"github.com/go-passwd/validator"
 	valid "github.com/go-validator/validator"
 	log "github.com/sirupsen/logrus"
-	users "project1.com/project/display_to_user_end"
+	"project1.com/project/utility"
 )
 
 /*func display(res map[string]string, w http.ResponseWriter) {
@@ -21,7 +21,7 @@ func FeildValidation(det interface{}, w http.ResponseWriter, res map[string]stri
 	if err := valid.Validate(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Warn(res["message"])
 		return err
 	}
@@ -40,7 +40,7 @@ func Passwordvalidation(res map[string]string, password string, w http.ResponseW
 		w.WriteHeader(http.StatusBadRequest)
 		str := fmt.Sprintf("%s,Note:Password Should contain Atleast 2 Uppercase,Lowercase And 1 Number,Special Char", err.Error())
 		res["message"] = str
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Warn(err)
 		return true
 	}
@@ -53,7 +53,7 @@ func Emailvalidation(res map[string]string, email string, w http.ResponseWriter)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter valid email ID"
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Warn(err)
 		return true
 	}

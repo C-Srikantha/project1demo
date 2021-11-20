@@ -1,11 +1,11 @@
 package logsetup
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 
 	log "github.com/sirupsen/logrus"
-	users "project1.com/project/display_to_user_end"
 )
 
 //displays errors to user end
@@ -18,7 +18,8 @@ func Logfile(w http.ResponseWriter, res map[string]string) (*os.File, bool) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend..Cant Open Log file"
-		users.Display(res, w)
+		jsonstr, _ := json.Marshal(res)
+		w.Write(jsonstr)
 		return nil, true
 	}
 	formater := new(log.TextFormatter)

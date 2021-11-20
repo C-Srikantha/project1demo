@@ -24,7 +24,8 @@ func Generateotp() (string, bool) {
 	return string(b), false
 }
 func Emailgenerate(email, b string) error {
-	file, _ := os.Open("creditials.csv")
+	file, _ := os.Open("credentials.csv")
+	defer file.Close()
 	csvfile := csv.NewReader(file)
 	det, _ := csvfile.Read()
 	from := det[0]

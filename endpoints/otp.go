@@ -5,10 +5,11 @@ import (
 
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
-	users "project1.com/project/display_to_user_end"
+
 	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/logsetup"
 	"project1.com/project/otp"
+	"project1.com/project/utility"
 	"project1.com/project/validation"
 )
 
@@ -29,32 +30,7 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err := read.Readbody(r, w, res, &det); err != nil {
 		return
 	}
-	/*detail, err := io.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		res["message"] = "Failed to read request body!!!"
-		display(res, w)
-		log.Error(err)
-		return
-	}
-	var det Resetpassword
-	var det1 Registration
-	err = json.Unmarshal(detail, &det) //convert json to struct
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		res["message"] = "Something wrong in backend..Cant convert json to struct"
-		display(res, w)
-		log.Error(err)
-		return
-	}*/
-	//validation
-	/*if err := validator.Validate(det); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		res["message"] = "Please Enter all the details"
-		display(res, w)
-		log.Warn(res["message"])
-		return
-	}*/
+
 	//validation
 	if err := validation.FeildValidation(det, w, res); err != nil {
 		return
@@ -64,7 +40,7 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		res["message"] = "User Not Found"
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Warn(err)
 		return
 	}
@@ -73,32 +49,32 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if flag {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "generating otp failed"
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Error(otpstr)
 		return
 	}
 	//encryption of otp
-	if bytepass = validation.Encrption(otpstr, w, res); bytepass == nil {
+	if bytepass = utility.Encrption(otpstr, w, res); bytepass == nil {
 		return
 	}
 	//updating otp feild in database
 	_, err = db.Model(&det1).Set("otp=?", string(bytepass)).Where("username=?", det.Username).Update()
 	if err != nil {
-		w.WriteHeader(http.StatusNotModified)
+		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend..Failed to update pass"
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Error(err)
 	} else {
 		w.WriteHeader(http.StatusCreated)
 		if err := otp.Emailgenerate(det1.Email, otpstr); err != nil {
-			w.WriteHeader(http.StatusNotModified)
+			w.WriteHeader(http.StatusInternalServerError)
 			res["message"] = "Failed to send mail"
-			users.Display(res, w)
+			utility.Display(res, w)
 			log.Error(err)
 			return
 		}
 		res["message"] = "Otp has sent via mail"
-		users.Display(res, w)
+		utility.Display(res, w)
 		log.Info(res["message"])
 	}
 

@@ -1,11 +1,11 @@
-package validation
+package utility
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
-	users "project1.com/project/display_to_user_end"
 	"project1.com/project/logsetup"
 )
 
@@ -21,9 +21,13 @@ func Encrption(password string, w http.ResponseWriter, res map[string]string) []
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend...Failed to encrypt password"
-		users.Display(res, w)
+		Display(res, w)
 		log.Println(err.Error())
 		return nil
 	}
 	return bytes
+}
+func Display(res map[string]string, w http.ResponseWriter) {
+	jsonstr, _ := json.Marshal(res)
+	w.Write(jsonstr)
 }
