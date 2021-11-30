@@ -17,12 +17,8 @@ import (
 	w.Write(jsonstr)
 }*/
 //validation of feilds wheather empty or not
-func FeildValidation(det interface{}, w http.ResponseWriter, res map[string]string) error {
+func FeildValidation(det interface{}) error {
 	if err := valid.Validate(det); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		res["message"] = "Please Enter all the details"
-		utility.Display(res, w)
-		log.Warn(res["message"])
 		return err
 	}
 	return nil

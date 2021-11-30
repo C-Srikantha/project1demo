@@ -39,7 +39,11 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	if err := read.Readbody(r, w, res, &det); err != nil { //calling Readbody for reading requestbody
 		return
 	}
-	if err := validation.FeildValidation(det, w, res); err != nil {
+	if err := validation.FeildValidation(det); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		res["message"] = "Please Enter all the details"
+		utility.Display(res, w)
+		log.Warn(res["message"])
 		return
 	}
 	if flag := validation.Passwordvalidation(res, det.Password, w); flag {

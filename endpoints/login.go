@@ -34,7 +34,11 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	//validation
-	if err := validation.FeildValidation(det, w, res); err != nil {
+	if err := validation.FeildValidation(det); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		res["message"] = "Please Enter all the details"
+		utility.Display(res, w)
+		log.Warn(res["message"])
 		return
 	}
 	err := db.Model(&det1).Where("username=?", det.Username).Select()
@@ -50,7 +54,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
 		res["message"] = "Entered password is wrong!!!"
 		utility.Display(res, w)
-		log.Error(err) //
+		log.Error(err)
 	} else {
 		w.WriteHeader(http.StatusFound)
 		str := fmt.Sprintf("%s Welcome", det.Username)
