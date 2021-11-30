@@ -3,13 +3,13 @@ package endpoints
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 
 	read "project1.com/project/endpoints/readrequestbody"
-	"project1.com/project/logsetup"
 	"project1.com/project/utility"
 	"project1.com/project/validation"
 )
@@ -28,11 +28,11 @@ var res = map[string]string{"message": ""}
 var bytepass []byte
 
 //registers the user data to the table registration in database
-func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
-	file, flag := logsetup.Logfile(w, res)
-	if flag {
-		return
-	}
+func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
+	/*	file, flag := logsetup.Logfile(w, res)
+		if flag {
+			return
+		}*/
 	defer file.Close()
 	log.SetOutput(file) //setting log output destination
 	var det *Registration
@@ -46,14 +46,27 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		log.Warn(res["message"])
 		return
 	}
-	if flag := validation.Passwordvalidation(res, det.Password, w); flag {
+	if err := validation.PasswordValidation(det.Password); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		str := fmt.Sprintf("%s,Note:Password Should contain Atleast 2 Uppercase,Lowercase And 1 Number,Special Char", err.Error())
+		res["message"] = str
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
-	if flag := validation.Emailvalidation(res, det.Email, w); flag {
+	if err := validation.EmailValidation(res, det.Email, w); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		res["message"] = "Please Enter valid email ID"
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
 	//encrption of password
-	if bytepass = utility.Encrption(det.Password, w, res); bytepass == nil {
+	if bytepass, err := utility.Encrption(det.Password); bytepass == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		res["message"] = "Something wrong in backend...Failed to encrypt password"
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
 	det.Password = string(bytepass)  //converts byte to string and update the feild of password

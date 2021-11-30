@@ -2,12 +2,12 @@ package endpoints
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 
 	read "project1.com/project/endpoints/readrequestbody"
-	"project1.com/project/logsetup"
 	"project1.com/project/otp"
 	"project1.com/project/utility"
 	"project1.com/project/validation"
@@ -17,12 +17,12 @@ type Resetpassword struct { //naming convention
 	Username string `validate:"nonzero"`
 }
 
-func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
-	file, flag := logsetup.Logfile(w, res)
+func ResetPassotp(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
+	/*file, flag := logsetup.Logfile(w, res)
 	if flag {
 		return
 	}
-	defer file.Close()
+	defer file.Close()*/
 	log.SetOutput(file)
 	var det *Resetpassword
 	var det1 Registration
@@ -49,7 +49,7 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	//calling generate otp func
-	otpstr, flag := otp.Generateotp()
+	otpstr, flag := otp.GenerateOtp()
 	if flag {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "generating otp failed"
@@ -58,7 +58,11 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	//encryption of otp
-	if bytepass = utility.Encrption(otpstr, w, res); bytepass == nil {
+	if bytepass, err = utility.Encrption(otpstr); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		res["message"] = "Something wrong in backend...Failed to encrypt password"
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
 	//updating otp feild in database
@@ -70,7 +74,7 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		log.Error(err)
 	} else {
 		w.WriteHeader(http.StatusCreated)
-		if err := otp.Emailgenerate(det1.Email, otpstr); err != nil {
+		if err := otp.EmailGenerate(det1.Email, otpstr); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			res["message"] = "Failed to send mail"
 			utility.Display(res, w)

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"project1.com/project/dbconnection"
+	"project1.com/project/logsetup"
 )
 
 type Inputs struct {
@@ -45,6 +46,8 @@ var reset = []Inputs{
 //test for regester api
 func TestRegister(t *testing.T) {
 	db, _ := dbconnection.DatabaseConnection()
+	file, _ := logsetup.LogFile()
+	defer file.Close()
 	for _, val := range reg {
 		req, err := http.NewRequest("POST", "/registration", bytes.NewBuffer(val.input))
 		if err != nil {
@@ -52,7 +55,7 @@ func TestRegister(t *testing.T) {
 			return
 		}
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { PostRegistration(rw, r, db) })
+		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { PostRegistration(rw, r, db, file) })
 		handler.ServeHTTP(rr, req)
 		if statuscode := rr.Code; statuscode != val.wantcode {
 			t.Errorf("got=%v,want=%v", rr.Code, val.wantcode)
@@ -64,6 +67,8 @@ func TestRegister(t *testing.T) {
 //test for login api
 func TestLogin(t *testing.T) {
 	db, _ := dbconnection.DatabaseConnection()
+	file, _ := logsetup.LogFile()
+	defer file.Close()
 	for _, val := range login {
 		//input := []byte(`{"username":"sriki","password":"aa@123AA"}`)
 		req, err := http.NewRequest("POST", "/login", bytes.NewBuffer(val.input))
@@ -72,7 +77,7 @@ func TestLogin(t *testing.T) {
 			return
 		}
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { Login(rw, r, db) })
+		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { Login(rw, r, db, file) })
 		handler.ServeHTTP(rr, req)
 		if statuscode := rr.Code; statuscode != val.wantcode {
 			t.Errorf("got=%v,want=%v", rr.Code, val.wantcode)
@@ -84,6 +89,8 @@ func TestLogin(t *testing.T) {
 //test for otp api
 func TestOtp(t *testing.T) {
 	db, _ := dbconnection.DatabaseConnection()
+	file, _ := logsetup.LogFile()
+	defer file.Close()
 	for _, val := range inotp {
 		req, err := http.NewRequest("POST", "/generateotp", bytes.NewBuffer(val.input))
 		if err != nil {
@@ -91,7 +98,7 @@ func TestOtp(t *testing.T) {
 			return
 		}
 		rr := httptest.NewRecorder()
-		handle := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { Resetpassotp(rw, r, db) })
+		handle := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { ResetPassotp(rw, r, db, file) })
 		handle.ServeHTTP(rr, req)
 		if statuscode := rr.Code; statuscode != val.wantcode {
 			t.Errorf("got=%v,want=%v", rr.Code, val.wantcode)
@@ -102,6 +109,8 @@ func TestOtp(t *testing.T) {
 //test for resetpass api
 func TestReset(t *testing.T) {
 	db, _ := dbconnection.DatabaseConnection()
+	file, _ := logsetup.LogFile()
+	defer file.Close()
 	for _, val := range reset {
 		req, err := http.NewRequest("POST", "/reset", bytes.NewBuffer(val.input))
 		if err != nil {
@@ -109,7 +118,7 @@ func TestReset(t *testing.T) {
 			return
 		}
 		rr := httptest.NewRecorder()
-		handle := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { Reset(rw, r, db) })
+		handle := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { Reset(rw, r, db, file) })
 		handle.ServeHTTP(rr, req)
 		if statuscode := rr.Code; statuscode != val.wantcode {
 			t.Errorf("got=%v,want=%v", rr.Code, val.wantcode)

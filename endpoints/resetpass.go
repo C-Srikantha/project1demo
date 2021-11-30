@@ -1,13 +1,14 @@
 package endpoints
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	read "project1.com/project/endpoints/readrequestbody"
-	"project1.com/project/logsetup"
 	"project1.com/project/utility"
 	"project1.com/project/validation"
 )
@@ -18,12 +19,12 @@ type Resetpass struct {
 	Newpassword string `validate:"nonzero"`
 }
 
-func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
-	file, flag := logsetup.Logfile(w, res)
+func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
+	/*file, flag := logsetup.Logfile(w, res)
 	if flag {
 		return
 	}
-	defer file.Close()
+	defer file.Close()*/
 	log.SetOutput(file) //setting output destination
 	var det *Resetpass
 	var det1 Registration
@@ -37,10 +38,15 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
 		utility.Display(res, w)
-		log.Warn(res["message"])
+		log.Error(err)
 		return
 	}
-	if flag := validation.Passwordvalidation(res, det.Newpassword, w); flag {
+	if err := validation.PasswordValidation(det.Newpassword); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		str := fmt.Sprintf("%s,Note:Password Should contain Atleast 2 Uppercase,Lowercase And 1 Number,Special Char", err.Error())
+		res["message"] = str
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
 	//Username exist or not
@@ -63,7 +69,11 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 	}
 
 	//Encryption of password
-	if bytepass = utility.Encrption(det.Newpassword, w, res); bytepass == nil {
+	if bytepass, err = utility.Encrption(det.Newpassword); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		res["message"] = "Something wrong in backend...Failed to encrypt password"
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
 	//updating password into database
