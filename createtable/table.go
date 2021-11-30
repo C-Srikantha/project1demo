@@ -17,7 +17,7 @@ type Registration struct {
 }
 
 //Creates tabel in database and returns error
-func Createtable(db *pg.DB) error {
+func CreateTable(db *pg.DB) error {
 	table := []interface{}{
 		(*Registration)(nil),
 	}

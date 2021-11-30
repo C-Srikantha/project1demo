@@ -8,7 +8,7 @@ import (
 
 //connection to the database
 func DatabaseConnection() (*pg.DB, error) {
-	dbdetail := &pg.Options{
+	dbdetail := &pg.Options{ //naming convention
 		User:     "postgres",
 		Password: "codecraft",
 		Addr:     ":8080",

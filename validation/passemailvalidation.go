@@ -41,7 +41,7 @@ func Passwordvalidation(res map[string]string, password string, w http.ResponseW
 		str := fmt.Sprintf("%s,Note:Password Should contain Atleast 2 Uppercase,Lowercase And 1 Number,Special Char", err.Error())
 		res["message"] = str
 		utility.Display(res, w)
-		log.Warn(err)
+		log.Error(err)
 		return true
 	}
 	return false
@@ -54,7 +54,7 @@ func Emailvalidation(res map[string]string, email string, w http.ResponseWriter)
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter valid email ID"
 		utility.Display(res, w)
-		log.Warn(err)
+		log.Error(err)
 		return true
 	}
 	return false

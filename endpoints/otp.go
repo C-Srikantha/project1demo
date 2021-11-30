@@ -13,7 +13,7 @@ import (
 	"project1.com/project/validation"
 )
 
-type Resetpassword struct {
+type Resetpassword struct { //naming convention
 	Username string `validate:"nonzero"`
 }
 

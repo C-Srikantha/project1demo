@@ -45,7 +45,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please enter valid Username "
 		utility.Display(res, w)
-		log.Warn(err)
+		log.Error(err)
 		return
 	}
 	//checks otp matches with database
@@ -54,7 +54,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
 		res["message"] = "OTP Entered is wrong!!!"
 		utility.Display(res, w)
-		log.Warn(err)
+		log.Error(err)
 		return
 	}
 

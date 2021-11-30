@@ -50,7 +50,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		w.WriteHeader(http.StatusUnauthorized) //status code for unathorization
 		res["message"] = "Entered password is wrong!!!"
 		utility.Display(res, w)
-		log.Warn(err)
+		log.Error(err) //
 	} else {
 		w.WriteHeader(http.StatusFound)
 		str := fmt.Sprintf("%s Welcome", det.Username)
