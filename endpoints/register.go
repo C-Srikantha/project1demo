@@ -18,7 +18,7 @@ import (
 var res = map[string]string{"message": ""}
 var bytepass []byte
 
-//registers the user data to the table registration in database
+//PostRegistration function registers the user data to the table registration in database
 func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 
 	log.SetOutput(file) //setting log output destination
@@ -26,6 +26,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *o
 	if err := read.Readbody(r, w, res, &det); err != nil { //calling Readbody for reading requestbody
 		return
 	}
+	//validation of feilds if empty or not
 	if err := validation.FeildValidation(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
@@ -33,6 +34,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *o
 		log.Warn(res["message"])
 		return
 	}
+	//validation of password
 	if err := validation.PasswordValidation(det.Password); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		str := fmt.Sprintf("%s,Note:Password Should contain Atleast 2 Uppercase,Lowercase And 1 Number,Special Char", err.Error())
@@ -41,6 +43,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *o
 		log.Error(err)
 		return
 	}
+	//validation of Email
 	if err := validation.EmailValidation(res, det.Email, w); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter valid email ID"

@@ -10,6 +10,7 @@ import (
 
 const otp = "1234567890"
 
+//GenerateOtp function generates 6 digit random number
 func GenerateOtp() (string, bool) {
 	//generating random numbers of len 6
 	b := make([]byte, 6)
@@ -22,6 +23,8 @@ func GenerateOtp() (string, bool) {
 	}
 	return string(b), false
 }
+
+//EmailGenerate generates a email along with otp to users
 func EmailGenerate(email, b string) error {
 	/*file, _ := os.Open("credentials.csv")
 	defer file.Close()

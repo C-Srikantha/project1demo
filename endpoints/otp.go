@@ -18,6 +18,7 @@ type Resetpassword struct { //naming convention
 	Username string `validate:"nonzero"`
 }
 
+//ResetPassotp generates otp and sends mail to the user
 func ResetPassotp(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 	log.SetOutput(file)
 	var det *Resetpassword
@@ -27,7 +28,7 @@ func ResetPassotp(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.Fi
 		return
 	}
 
-	//validation
+	//validation of feilds is empty or not
 	if err := validation.FeildValidation(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"

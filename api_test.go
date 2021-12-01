@@ -43,7 +43,7 @@ var reset = []Inputs{
 	{[]byte(`{"username":"srikiantha","otp":"12345","newpassword":"sa@123AA"}`), http.StatusBadRequest},
 }
 
-//test for regester api
+//test for register api
 func TestRegister(t *testing.T) {
 	db, _ := dbconnection.DatabaseConnection()
 	file, _ := logsetup.LogFile()

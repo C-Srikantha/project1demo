@@ -29,7 +29,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 		return
 	}
 
-	//vallidation
+	//validation of feilds if empty or not
 	if err := validation.FeildValidation(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
@@ -37,6 +37,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 		log.Error(err)
 		return
 	}
+	//validation of password
 	if err := validation.PasswordValidation(det.Newpassword); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		str := fmt.Sprintf("%s,Note:Password Should contain Atleast 2 Uppercase,Lowercase And 1 Number,Special Char", err.Error())

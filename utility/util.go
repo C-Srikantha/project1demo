@@ -7,7 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-//encrption of password
+//Encrption function encrpts the password and returns byte value and a error
 func Encrption(password string) ([]byte, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10) //Encryption of password feild to bytes
 	if err != nil {

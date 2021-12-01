@@ -21,7 +21,7 @@ type Logininfo struct {
 	Password string `validate:"nonzero"`
 }
 
-//checks user is present and allows user to login is password matches in db
+//Login function checks user is present and allows user to login is password matches in db
 func Login(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 
 	log.SetOutput(file) //setting output destination
@@ -30,7 +30,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 	if err := read.Readbody(r, w, res, &det); err != nil {
 		return
 	}
-	//validation
+	//validation of feilds is empty or not
 	if err := validation.FeildValidation(det); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
@@ -38,6 +38,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 		log.Warn(res["message"])
 		return
 	}
+	//Username exist or not
 	err := db.Model(&det1).Where("username=?", det.Username).Select()
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
