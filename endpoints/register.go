@@ -32,8 +32,8 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *o
 	/*	file, flag := logsetup.Logfile(w, res)
 		if flag {
 			return
-		}*/
-	defer file.Close()
+		}
+	defer file.Close()*/
 	log.SetOutput(file) //setting log output destination
 	var det *Registration
 	if err := read.Readbody(r, w, res, &det); err != nil { //calling Readbody for reading requestbody
