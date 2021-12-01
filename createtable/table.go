@@ -7,12 +7,12 @@ import (
 
 //defines the tabel feilds using struct
 type Registration struct {
-	Id        int `pg:",pk"`
-	Firstname string
-	Lastname  string
-	Username  string `sql:",unique"`
-	Password  string
-	Email     string `sql:",unique"`
+	Id        int    `pg:",pk" `
+	Firstname string `validate:"nonzero"`
+	Lastname  string `validate:"nonzero"`
+	Username  string `sql:",unique" validate:"nonzero"`
+	Password  string `validate:"nonzero"`
+	Email     string `sql:",unique" validate:"nonzero"`
 	Otp       string
 }
 

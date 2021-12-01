@@ -27,6 +27,7 @@ func EmailGenerate(email, b string) error {
 	defer file.Close()
 	csvfile := csv.NewReader(file)
 	det, _ := csvfile.Read()*/
+	Cred()
 	from := os.Getenv("FromEmail")
 	password := os.Getenv("Password")
 	to := []string{

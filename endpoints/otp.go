@@ -7,6 +7,7 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 
+	"project1.com/project/createtable"
 	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/otp"
 	"project1.com/project/utility"
@@ -18,14 +19,9 @@ type Resetpassword struct { //naming convention
 }
 
 func ResetPassotp(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
-	/*file, flag := logsetup.Logfile(w, res)
-	if flag {
-		return
-	}
-	defer file.Close()*/
 	log.SetOutput(file)
 	var det *Resetpassword
-	var det1 Registration
+	var det1 createtable.Registration
 	//reads username from body
 	if err := read.Readbody(r, w, res, &det); err != nil {
 		return

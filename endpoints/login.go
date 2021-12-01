@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 
+	"project1.com/project/createtable"
 	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/utility"
 	"project1.com/project/validation"
@@ -22,14 +23,10 @@ type Logininfo struct {
 
 //checks user is present and allows user to login is password matches in db
 func Login(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
-	/*	file, flag := logsetup.Logfile(w, res)
-		if flag {
-			return
-		}
-		defer file.Close()*/
+
 	log.SetOutput(file) //setting output destination
 	var det *Logininfo
-	var det1 Registration
+	var det1 createtable.Registration
 	if err := read.Readbody(r, w, res, &det); err != nil {
 		return
 	}

@@ -9,33 +9,20 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 
+	"project1.com/project/createtable"
 	read "project1.com/project/endpoints/readrequestbody"
 	"project1.com/project/utility"
 	"project1.com/project/validation"
 )
-
-type Registration struct {
-	Id        int
-	Firstname string `validate:"nonzero"`
-	Lastname  string `validate:"nonzero"`
-	Username  string `validate:"nonzero"`
-	Password  string `validate:"nonzero"`
-	Email     string `validate:"nonzero"`
-	Otp       string
-}
 
 var res = map[string]string{"message": ""}
 var bytepass []byte
 
 //registers the user data to the table registration in database
 func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
-	/*	file, flag := logsetup.Logfile(w, res)
-		if flag {
-			return
-		}
-	defer file.Close()*/
+
 	log.SetOutput(file) //setting log output destination
-	var det *Registration
+	var det *createtable.Registration
 	if err := read.Readbody(r, w, res, &det); err != nil { //calling Readbody for reading requestbody
 		return
 	}
@@ -62,15 +49,16 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *o
 		return
 	}
 	//encrption of password
-	if bytepass, err := utility.Encrption(det.Password); bytepass == nil {
+	bytepass, err := utility.Encrption(det.Password)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "Something wrong in backend...Failed to encrypt password"
 		utility.Display(res, w)
 		log.Error(err)
 		return
 	}
-	det.Password = string(bytepass)  //converts byte to string and update the feild of password
-	_, err := db.Model(det).Insert() //query to Insert the data into database
+	det.Password = string(bytepass) //converts byte to string and update the feild of password
+	_, err = db.Model(det).Insert() //query to Insert the data into database
 	//checks wheather username or email exists
 	if err != nil {
 		str := err.Error()
