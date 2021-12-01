@@ -25,7 +25,19 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 	var det *Resetpass
 	var det1 createtable.Registration
 	//reading body and store values to var det
-	if err := read.Readbody(r, w, res, &det); err != nil {
+	detail, err := read.ReadBody(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		res["message"] = "Failed to read request body!!!"
+		utility.Display(res, w)
+		log.Error(err)
+		return
+	}
+	if err := read.Convert(detail, &det); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		res["message"] = "Something wrong in backend..Cant convert json to struct"
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
 
@@ -47,7 +59,7 @@ func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 		return
 	}
 	//Username exist or not
-	err := db.Model(&det1).Where("username=?", det.Username).Select() //query to check username exist or not
+	err = db.Model(&det1).Where("username=?", det.Username).Select() //query to check username exist or not
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please enter valid Username "

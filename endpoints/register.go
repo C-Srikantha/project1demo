@@ -23,7 +23,19 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *o
 
 	log.SetOutput(file) //setting log output destination
 	var det *createtable.Registration
-	if err := read.Readbody(r, w, res, &det); err != nil { //calling Readbody for reading requestbody
+	detail, err := read.ReadBody(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		res["message"] = "Failed to read request body!!!"
+		utility.Display(res, w)
+		log.Error(err)
+		return
+	}
+	if err := read.Convert(detail, &det); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		res["message"] = "Something wrong in backend..Cant convert json to struct"
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
 	//validation of feilds if empty or not
@@ -31,7 +43,7 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *o
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
 		utility.Display(res, w)
-		log.Warn(res["message"])
+		log.Error(err)
 		return
 	}
 	//validation of password
@@ -70,11 +82,9 @@ func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *o
 		if last == "registrations_email_key" {
 			res["message"] = "Email-Id is already registered"
 			utility.Display(res, w)
-			log.Warn(res["message"])
 		} else {
 			res["message"] = "Username is already registered"
 			utility.Display(res, w)
-			log.Warn(res["message"])
 		}
 		log.Error(err)
 	} else {

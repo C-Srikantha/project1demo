@@ -26,10 +26,6 @@ func GenerateOtp() (string, bool) {
 
 //EmailGenerate generates a email along with otp to users
 func EmailGenerate(email, b string) error {
-	/*file, _ := os.Open("credentials.csv")
-	defer file.Close()
-	csvfile := csv.NewReader(file)
-	det, _ := csvfile.Read()*/
 	Cred()
 	from := os.Getenv("FromEmail")
 	password := os.Getenv("Password")

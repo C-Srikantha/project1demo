@@ -27,7 +27,19 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 	log.SetOutput(file) //setting output destination
 	var det *Logininfo
 	var det1 createtable.Registration
-	if err := read.Readbody(r, w, res, &det); err != nil {
+	detail, err := read.ReadBody(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		res["message"] = "Failed to read request body!!!"
+		utility.Display(res, w)
+		log.Error(err)
+		return
+	}
+	if err := read.Convert(detail, &det); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		res["message"] = "Something wrong in backend..Cant convert json to struct"
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
 	//validation of feilds is empty or not
@@ -35,11 +47,11 @@ func Login(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
 		utility.Display(res, w)
-		log.Warn(res["message"])
+		log.Error(err)
 		return
 	}
 	//Username exist or not
-	err := db.Model(&det1).Where("username=?", det.Username).Select()
+	err = db.Model(&det1).Where("username=?", det.Username).Select()
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		res["message"] = "No User Found"

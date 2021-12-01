@@ -24,7 +24,19 @@ func ResetPassotp(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.Fi
 	var det *Resetpassword
 	var det1 createtable.Registration
 	//reads username from body
-	if err := read.Readbody(r, w, res, &det); err != nil {
+	detail, err := read.ReadBody(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		res["message"] = "Failed to read request body!!!"
+		utility.Display(res, w)
+		log.Error(err)
+		return
+	}
+	if err := read.Convert(detail, &det); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		res["message"] = "Something wrong in backend..Cant convert json to struct"
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
 
@@ -33,16 +45,16 @@ func ResetPassotp(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.Fi
 		w.WriteHeader(http.StatusBadRequest)
 		res["message"] = "Please Enter all the details"
 		utility.Display(res, w)
-		log.Warn(res["message"])
+		log.Error(res["message"])
 		return
 	}
 	//checks username exists or not
-	err := db.Model(&det1).Where("username=?", det.Username).Select()
+	err = db.Model(&det1).Where("username=?", det.Username).Select()
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		res["message"] = "User Not Found"
 		utility.Display(res, w)
-		log.Warn(err)
+		log.Error(err)
 		return
 	}
 	//calling generate otp func
