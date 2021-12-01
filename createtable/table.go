@@ -3,23 +3,13 @@ package createtable
 import (
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
+	"project1.com/project/enti"
 )
-
-//defines the tabel feilds using struct
-type Registration struct {
-	Id        int    `pg:",pk" `
-	Firstname string `validate:"nonzero"`
-	Lastname  string `validate:"nonzero"`
-	Username  string `sql:",unique" validate:"nonzero"`
-	Password  string `validate:"nonzero"`
-	Email     string `sql:",unique" validate:"nonzero"`
-	Otp       string
-}
 
 //Creates tabel in database and returns error
 func CreateTable(db *pg.DB) error {
 	table := []interface{}{
-		(*Registration)(nil),
+		(*enti.Registration)(nil),
 	}
 	for _, table := range table {
 		err := db.Model(table).CreateTable(&orm.CreateTableOptions{ //query for creating tabel

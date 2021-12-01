@@ -9,8 +9,8 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 
-	"project1.com/project/createtable"
 	read "project1.com/project/endpoints/readrequestbody"
+	"project1.com/project/enti"
 	"project1.com/project/utility"
 	"project1.com/project/validation"
 )
@@ -22,7 +22,7 @@ var bytepass []byte
 func PostRegistration(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 
 	log.SetOutput(file) //setting log output destination
-	var det *createtable.Registration
+	var det *enti.Registration
 	detail, err := read.ReadBody(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

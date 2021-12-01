@@ -8,13 +8,13 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
-	"project1.com/project/createtable"
 	read "project1.com/project/endpoints/readrequestbody"
+	"project1.com/project/enti"
 	"project1.com/project/utility"
 	"project1.com/project/validation"
 )
 
-type Resetpass struct {
+type ResetPass struct {
 	Username    string `validate:"nonzero"`
 	Otp         string `validate:"nonzero"`
 	Newpassword string `validate:"nonzero"`
@@ -22,8 +22,8 @@ type Resetpass struct {
 
 func Reset(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 	log.SetOutput(file) //setting output destination
-	var det *Resetpass
-	var det1 createtable.Registration
+	var det *ResetPass
+	var det1 enti.Registration
 	//reading body and store values to var det
 	detail, err := read.ReadBody(r)
 	if err != nil {

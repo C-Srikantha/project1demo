@@ -10,13 +10,13 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 
-	"project1.com/project/createtable"
 	read "project1.com/project/endpoints/readrequestbody"
+	"project1.com/project/enti"
 	"project1.com/project/utility"
 	"project1.com/project/validation"
 )
 
-type Logininfo struct {
+type LoginInfo struct {
 	Username string `validate:"nonzero"`
 	Password string `validate:"nonzero"`
 }
@@ -25,8 +25,8 @@ type Logininfo struct {
 func Login(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 
 	log.SetOutput(file) //setting output destination
-	var det *Logininfo
-	var det1 createtable.Registration
+	var det *LoginInfo
+	var det1 enti.Registration
 	detail, err := read.ReadBody(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

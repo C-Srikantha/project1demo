@@ -7,22 +7,22 @@ import (
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 
-	"project1.com/project/createtable"
 	read "project1.com/project/endpoints/readrequestbody"
+	"project1.com/project/enti"
 	"project1.com/project/otp"
 	"project1.com/project/utility"
 	"project1.com/project/validation"
 )
 
-type Resetpassword struct { //naming convention
+type ResetPassword struct { //naming convention
 	Username string `validate:"nonzero"`
 }
 
 //ResetPassotp generates otp and sends mail to the user
 func ResetPassotp(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 	log.SetOutput(file)
-	var det *Resetpassword
-	var det1 createtable.Registration
+	var det *ResetPassword
+	var det1 enti.Registration
 	//reads username from body
 	detail, err := read.ReadBody(r)
 	if err != nil {
