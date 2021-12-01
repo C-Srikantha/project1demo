@@ -1,13 +1,14 @@
-package endpoints
+package main
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	log "github.com/sirupsen/logrus"
 	"project1.com/project/dbconnection"
+	"project1.com/project/endpoints"
 	"project1.com/project/logsetup"
 )
 
@@ -33,8 +34,7 @@ var login = []Inputs{
 }
 var inotp = []Inputs{
 	{[]byte(`{"username":""}`), http.StatusBadRequest},
-	{[]byte(`{"username":"srikantha"}`), http.StatusBadRequest},
-	//{[]byte(`{"username":"sriki"}`), http.StatusCreated},
+	{[]byte(`{"username":"srikantha"}`), http.StatusNotFound},
 }
 var reset = []Inputs{
 	{[]byte(`{"username":"","otp":"","newpassword":""}`), http.StatusBadRequest},
@@ -48,14 +48,15 @@ func TestRegister(t *testing.T) {
 	db, _ := dbconnection.DatabaseConnection()
 	file, _ := logsetup.LogFile()
 	defer file.Close()
+	log.SetOutput(file)
 	for _, val := range reg {
 		req, err := http.NewRequest("POST", "/registration", bytes.NewBuffer(val.input))
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 			return
 		}
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { PostRegistration(rw, r, db, file) })
+		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { endpoints.PostRegistration(rw, r, db, file) })
 		handler.ServeHTTP(rr, req)
 		if statuscode := rr.Code; statuscode != val.wantcode {
 			t.Errorf("got=%v,want=%v", rr.Code, val.wantcode)
@@ -69,15 +70,16 @@ func TestLogin(t *testing.T) {
 	db, _ := dbconnection.DatabaseConnection()
 	file, _ := logsetup.LogFile()
 	defer file.Close()
+	log.SetOutput(file)
 	for _, val := range login {
 		//input := []byte(`{"username":"sriki","password":"aa@123AA"}`)
 		req, err := http.NewRequest("POST", "/login", bytes.NewBuffer(val.input))
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 			return
 		}
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { Login(rw, r, db, file) })
+		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { endpoints.Login(rw, r, db, file) })
 		handler.ServeHTTP(rr, req)
 		if statuscode := rr.Code; statuscode != val.wantcode {
 			t.Errorf("got=%v,want=%v", rr.Code, val.wantcode)
@@ -91,14 +93,15 @@ func TestOtp(t *testing.T) {
 	db, _ := dbconnection.DatabaseConnection()
 	file, _ := logsetup.LogFile()
 	defer file.Close()
+	log.SetOutput(file)
 	for _, val := range inotp {
 		req, err := http.NewRequest("POST", "/generateotp", bytes.NewBuffer(val.input))
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 			return
 		}
 		rr := httptest.NewRecorder()
-		handle := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { ResetPassotp(rw, r, db, file) })
+		handle := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { endpoints.ResetPassotp(rw, r, db, file) })
 		handle.ServeHTTP(rr, req)
 		if statuscode := rr.Code; statuscode != val.wantcode {
 			t.Errorf("got=%v,want=%v", rr.Code, val.wantcode)
@@ -111,14 +114,15 @@ func TestReset(t *testing.T) {
 	db, _ := dbconnection.DatabaseConnection()
 	file, _ := logsetup.LogFile()
 	defer file.Close()
+	log.SetOutput(file)
 	for _, val := range reset {
 		req, err := http.NewRequest("POST", "/reset", bytes.NewBuffer(val.input))
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 			return
 		}
 		rr := httptest.NewRecorder()
-		handle := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { Reset(rw, r, db, file) })
+		handle := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) { endpoints.Reset(rw, r, db, file) })
 		handle.ServeHTTP(rr, req)
 		if statuscode := rr.Code; statuscode != val.wantcode {
 			t.Errorf("got=%v,want=%v", rr.Code, val.wantcode)
