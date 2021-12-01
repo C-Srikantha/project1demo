@@ -2,7 +2,6 @@ package otp
 
 import (
 	"crypto/rand"
-	"encoding/csv"
 	"fmt"
 	"io"
 	"net/smtp"
@@ -11,7 +10,8 @@ import (
 
 const otp = "1234567890"
 
-func Generateotp() (string, bool) {
+//GenerateOtp function generates 6 digit random number
+func GenerateOtp() (string, bool) {
 	//generating random numbers of len 6
 	b := make([]byte, 6)
 	_, err := io.ReadAtLeast(rand.Reader, b, 6)
@@ -23,13 +23,12 @@ func Generateotp() (string, bool) {
 	}
 	return string(b), false
 }
-func Emailgenerate(email, b string) error {
-	file, _ := os.Open("credentials.csv")
-	defer file.Close()
-	csvfile := csv.NewReader(file)
-	det, _ := csvfile.Read()
-	from := det[0]
-	password := det[1]
+
+//EmailGenerate generates a email along with otp to users
+func EmailGenerate(email, b string) error {
+	Cred()
+	from := os.Getenv("FromEmail")
+	password := os.Getenv("Password")
 	to := []string{
 		email,
 	}

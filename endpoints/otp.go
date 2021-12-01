@@ -2,12 +2,13 @@ package endpoints
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 
+	"project1.com/project/createtable"
 	read "project1.com/project/endpoints/readrequestbody"
-	"project1.com/project/logsetup"
 	"project1.com/project/otp"
 	"project1.com/project/utility"
 	"project1.com/project/validation"
@@ -17,35 +18,47 @@ type Resetpassword struct { //naming convention
 	Username string `validate:"nonzero"`
 }
 
-func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
-	file, flag := logsetup.Logfile(w, res)
-	if flag {
-		return
-	}
-	defer file.Close()
+//ResetPassotp generates otp and sends mail to the user
+func ResetPassotp(w http.ResponseWriter, r *http.Request, db *pg.DB, file *os.File) {
 	log.SetOutput(file)
 	var det *Resetpassword
-	var det1 Registration
+	var det1 createtable.Registration
 	//reads username from body
-	if err := read.Readbody(r, w, res, &det); err != nil {
+	detail, err := read.ReadBody(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		res["message"] = "Failed to read request body!!!"
+		utility.Display(res, w)
+		log.Error(err)
+		return
+	}
+	if err := read.Convert(detail, &det); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		res["message"] = "Something wrong in backend..Cant convert json to struct"
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
 
-	//validation
-	if err := validation.FeildValidation(det, w, res); err != nil {
+	//validation of feilds is empty or not
+	if err := validation.FeildValidation(det); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		res["message"] = "Please Enter all the details"
+		utility.Display(res, w)
+		log.Error(res["message"])
 		return
 	}
 	//checks username exists or not
-	err := db.Model(&det1).Where("username=?", det.Username).Select()
+	err = db.Model(&det1).Where("username=?", det.Username).Select()
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		res["message"] = "User Not Found"
 		utility.Display(res, w)
-		log.Warn(err)
+		log.Error(err)
 		return
 	}
 	//calling generate otp func
-	otpstr, flag := otp.Generateotp()
+	otpstr, flag := otp.GenerateOtp()
 	if flag {
 		w.WriteHeader(http.StatusInternalServerError)
 		res["message"] = "generating otp failed"
@@ -54,7 +67,11 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		return
 	}
 	//encryption of otp
-	if bytepass = utility.Encrption(otpstr, w, res); bytepass == nil {
+	if bytepass, err = utility.Encrption(otpstr); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		res["message"] = "Something wrong in backend...Failed to encrypt password"
+		utility.Display(res, w)
+		log.Error(err)
 		return
 	}
 	//updating otp feild in database
@@ -66,7 +83,7 @@ func Resetpassotp(w http.ResponseWriter, r *http.Request, db *pg.DB) {
 		log.Error(err)
 	} else {
 		w.WriteHeader(http.StatusCreated)
-		if err := otp.Emailgenerate(det1.Email, otpstr); err != nil {
+		if err := otp.EmailGenerate(det1.Email, otpstr); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			res["message"] = "Failed to send mail"
 			utility.Display(res, w)
